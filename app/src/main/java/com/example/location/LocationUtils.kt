@@ -7,9 +7,11 @@ import androidx.core.content.ContextCompat
 
 class LocationUtils(val context: Context) {
 
-    fun hasLocationPermission(context: Context): Boolean = ContextCompat.checkSelfPermission(
-        context, Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-        context, Manifest.permission.ACCESS_COARSE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED
+    fun hasLocationPermission(context: Context): Boolean =
+        context.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) && context.hasPermission(
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
 }
+
+fun Context.hasPermission(permission: String): Boolean =
+    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
