@@ -63,11 +63,13 @@ fun LocationScreen(
     locationUtils: LocationUtils,
     modifier: Modifier = Modifier,
 ) {
+    val location = viewModel.location.value
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
             if (permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true && permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
                 // User has access to location
+                locationUtils.requestLocationUpdates(viewModel)
             } else {
                 // Ask for permission
                 if (locationUtils.shouldShowLocationRationale()) {
@@ -89,22 +91,27 @@ fun LocationScreen(
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
-        Text(text = "Location not available")
+        if (location != null) {
+            Text(text = "Address: ${location.latitude} ${location.longitude}")
+        } else {
+            Text(text = "Location not available")
+        }
         Button(
             onClick = {
                 if (locationUtils.hasLocationPermission()) {
-                // Permission already granted, update the location
-            } else {
-                // Request location permission
-                requestPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    // Permission already granted, update the location
+                    locationUtils.requestLocationUpdates(viewModel)
+                } else {
+                    // Request location permission
+                    requestPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
                     )
-                )
-            }
+                }
             },
         ) {
             Text(text = "Get Location")
