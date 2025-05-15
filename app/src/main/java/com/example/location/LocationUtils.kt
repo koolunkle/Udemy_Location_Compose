@@ -4,6 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -13,6 +15,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
+import java.util.Locale
 
 class LocationUtils(private val context: Context) {
 
@@ -39,6 +43,18 @@ class LocationUtils(private val context: Context) {
             locationCallback,
             Looper.getMainLooper(),
         )
+    }
+
+    fun reverseGeocodeLocation(location: LocationData): String {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        val coordinates = LatLng(location.latitude, location.longitude)
+        val address: MutableList<Address?>? =
+            geocoder.getFromLocation(coordinates.latitude, coordinates.longitude, 1)
+        return if (address?.isNotEmpty() == true) {
+            address[0]?.getAddressLine(0) ?: "Address not found"
+        } else {
+            "Address not found"
+        }
     }
 
     fun hasLocationPermission(): Boolean =

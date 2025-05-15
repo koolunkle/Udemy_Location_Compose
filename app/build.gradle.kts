@@ -46,6 +46,7 @@ dependencies {
 
     // Location
     implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
