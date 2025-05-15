@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.location.ui.theme.LocationTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,9 +28,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val viewModel: LocationViewModel = viewModel()
             LocationTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LocationApp(modifier = Modifier.padding(innerPadding))
+                    LocationApp(
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
@@ -38,16 +42,25 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LocationApp(modifier: Modifier = Modifier) {
+fun LocationApp(
+    viewModel: LocationViewModel,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val locationUtils = LocationUtils(context)
-    LocationScreen(locationUtils, context, modifier)
+    LocationScreen(
+        viewModel = viewModel,
+        context = context,
+        locationUtils = locationUtils,
+        modifier = modifier,
+    )
 }
 
 @Composable
 fun LocationScreen(
-    locationUtils: LocationUtils,
+    viewModel: LocationViewModel,
     context: Context,
+    locationUtils: LocationUtils,
     modifier: Modifier = Modifier,
 ) {
     val requestPermissionLauncher = rememberLauncherForActivityResult(
@@ -57,12 +70,7 @@ fun LocationScreen(
                 // User has access to location
             } else {
                 // Ask for permission
-                val rationalRequired = ActivityCompat.shouldShowRequestPermissionRationale(
-                    context as MainActivity, Manifest.permission.ACCESS_FINE_LOCATION
-                ) || ActivityCompat.shouldShowRequestPermissionRationale(
-                    context, Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-                if (rationalRequired) {
+                if (locationUtils.shouldShowLocationRationale()) {
                     Toast.makeText(
                         context,
                         "Location Permission is required for the feature to work",
@@ -86,7 +94,7 @@ fun LocationScreen(
         Text(text = "Location not available")
         Button(
             onClick = {
-            if (locationUtils.hasLocationPermission(context)) {
+                if (locationUtils.hasLocationPermission()) {
                 // Permission already granted, update the location
             } else {
                 // Request location permission
